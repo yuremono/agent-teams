@@ -1,0 +1,57 @@
+instructions/summary/ashigaru_summary.md
+  b450c98af26271d3 1-81
+instructions/summary/shogun_summary.md
+  b450c98af26271d3 1-90
+instructions/summary/karo_summary.md
+  b450c98af26271d3 1-96
+CLAUDE.md
+  acf800c8323a4d25 4,10-23,26,28-29,33,35,40-41,43,45,51,60,70-71,77,80,82,84,86,88,90,92-93,96,98,102,104,106,108-113
+instructions/ashigaru.md
+  0272f69948587e85 435-483
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.0.42",
+  "base_commit_sha": "74873ad7c4af6e079dc1e51dfe570d20ad3a27dc",
+  "prompts": {
+    "0272f69948587e85": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "354cc67b-500e-4cd0-b677-c51106c736f5",
+        "model": "glm-4.7"
+      },
+      "human_author": "yuremono <5alviaofficinali50@gmail.com>",
+      "messages": [],
+      "total_additions": 49,
+      "total_deletions": 0,
+      "accepted_lines": 49,
+      "overriden_lines": 0
+    },
+    "acf800c8323a4d25": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d7260c0a-6d6a-4967-80fc-0ef62fd1ec78",
+        "model": "glm-4.7"
+      },
+      "human_author": "yuremono <5alviaofficinali50@gmail.com>",
+      "messages": [],
+      "total_additions": 50,
+      "total_deletions": 256,
+      "accepted_lines": 50,
+      "overriden_lines": 0
+    },
+    "b450c98af26271d3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2760bf4d-26a1-4730-8e95-a67e5e0352e0",
+        "model": "glm-4.7"
+      },
+      "human_author": "yuremono <5alviaofficinali50@gmail.com>",
+      "messages": [],
+      "total_additions": 267,
+      "total_deletions": 0,
+      "accepted_lines": 267,
+      "overriden_lines": 0
+    }
+  }
+}
