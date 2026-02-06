@@ -1,0 +1,36 @@
+instructions/summary/karo_summary.md
+  19cdbe5e64e6408a 4,10-11,13,15,17-22,24-25,27,29,31-69,71-73,75-97,99,102-106,109,111,113,115-117,119-121,123-143,145-147,149,151,153-155,157-214,216-247,251-254,256-260,262,264,266-273,275,277-279
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.0.42",
+  "base_commit_sha": "5dd4843b59838241c4bebe2035dcafb56527bdfc",
+  "prompts": {
+    "19cdbe5e64e6408a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ad56c3f0-71c5-4c27-a1bf-44187d34a93b",
+        "model": "glm-4.7"
+      },
+      "human_author": "yuremono <5alviaofficinali50@gmail.com>",
+      "messages": [],
+      "total_additions": 245,
+      "total_deletions": 58,
+      "accepted_lines": 245,
+      "overriden_lines": 0
+    },
+    "bfad60760dd8fa17": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1c8c526d-1765-4e9f-b6a7-d517e2b4797b",
+        "model": "glm-4.7"
+      },
+      "human_author": "yuremono <5alviaofficinali50@gmail.com>",
+      "messages": [],
+      "total_additions": 346,
+      "total_deletions": 31,
+      "accepted_lines": 344,
+      "overriden_lines": 0
+    }
+  }
+}
