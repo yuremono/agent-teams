@@ -432,6 +432,55 @@ CLAUDE.md の /clear復帰フロー（~5,000トークン）だけで作業再開
 
 ## コンテキスト読み込み手順
 
+### 🔴 required_context によるジャストインタイム読み込み（CMD-009課題5対策）
+
+タスクYAMLに `required_context` フィールドがある場合、そこに指定されたコンテキストだけを読み込むこと。
+
+```yaml
+# タスクYAMLの例
+task:
+  task_id: cmd_010
+  required_context:
+    - memory/read_graph    # Memory MCPを読み込む（殿の好み・ルール）
+    - project_shogun       # context/shogun.md を読み込む（プロジェクト固有）
+    - instructions/ashigaru.md  # 足軽指示書を読み込む（詳細ルール）
+  # required_context が指定されていない場合、デフォルトの読み込みを行う
+```
+
+**required_context の値と対応するアクション**:
+
+| 値 | アクション | トークン概算 |
+|----|----------|-------------|
+| `memory/read_graph` | `mcp__memory__read_graph()` を実行 | ~700トークン |
+| `project_<name>` | `context/<name>.md` を読み込む | ~500-1000トークン |
+| `instructions/ashigaru.md` | 足軽指示書全体を読み込む | ~3,600トークン |
+| `none` | 何も読み込まない（最小限のタスク実行） | 0トークン |
+
+**使用例**:
+```yaml
+# 例1: 日常的なタスク（ルール確認不要）
+required_context:
+  - none  # タスクYAMLだけで実行可能
+
+# 例2: プロジェクト固有のタスク
+required_context:
+  - project_shogun  # shogunプロジェクトの知見が必要
+
+# 例3: 殿の好みを考慮するタスク
+required_context:
+  - memory/read_graph  # 殿の好みを確認
+
+# 例4: 複雑なタスク（全てのコンテキストが必要）
+required_context:
+  - memory/read_graph
+  - project_shogun
+  - instructions/ashigaru.md
+```
+
+**重要**: `required_context` が指定されていない場合、従来通り以下の順序で読み込むこと。
+
+### 従来の読み込み手順（required_context 未指定時）
+
 1. CLAUDE.md（プロジェクトルート） を読む
 2. **Memory MCP（read_graph） を読む**（システム全体の設定・殿の好み）
 3. config/projects.yaml で対象確認
