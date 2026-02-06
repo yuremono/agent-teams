@@ -1,0 +1,74 @@
+README_ja.md
+  a262316c61fd371c 166-225
+  a6dd16ee6c2b9b6e 885-886
+shutsujin_departure.sh
+  a6dd16ee6c2b9b6e 408-410,430-432
+  43e56ac19af5cbda 416
+instructions/shogun.md
+  43e56ac19af5cbda 291-329
+bin/notify-karo
+  acf800c8323a4d25 1-7,9,11-13,15-18,20,22-23,25-26,28-30,32-33,35-42,44-50,52-56,58-60,62
+TROUBLESHOOTING.md
+  43e56ac19af5cbda 7-22,25-26
+README.md
+  a262316c61fd371c 225-281
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.0.42",
+  "base_commit_sha": "fecdd2ee0ae7d05c58c94cf0639ebcc40042185f",
+  "prompts": {
+    "43e56ac19af5cbda": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9eeaa25c-2897-4d1c-ba90-8bcd57ffb724",
+        "model": "glm-4.7"
+      },
+      "human_author": "yuremono <5alviaofficinali50@gmail.com>",
+      "messages": [],
+      "total_additions": 66,
+      "total_deletions": 8,
+      "accepted_lines": 58,
+      "overriden_lines": 0
+    },
+    "a262316c61fd371c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "944a35cc-0e27-4743-884e-b40dd3b5962e",
+        "model": "glm-4.7"
+      },
+      "human_author": "yuremono <5alviaofficinali50@gmail.com>",
+      "messages": [],
+      "total_additions": 117,
+      "total_deletions": 0,
+      "accepted_lines": 117,
+      "overriden_lines": 0
+    },
+    "a6dd16ee6c2b9b6e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3165b107-d4bf-4380-bff4-d6a5796b3dc3",
+        "model": "glm-4.7"
+      },
+      "human_author": "yuremono <5alviaofficinali50@gmail.com>",
+      "messages": [],
+      "total_additions": 10,
+      "total_deletions": 5,
+      "accepted_lines": 8,
+      "overriden_lines": 0
+    },
+    "acf800c8323a4d25": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d7260c0a-6d6a-4967-80fc-0ef62fd1ec78",
+        "model": "glm-4.7"
+      },
+      "human_author": "yuremono <5alviaofficinali50@gmail.com>",
+      "messages": [],
+      "total_additions": 69,
+      "total_deletions": 7,
+      "accepted_lines": 49,
+      "overriden_lines": 0
+    }
+  }
+}
