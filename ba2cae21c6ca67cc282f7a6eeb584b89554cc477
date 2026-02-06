@@ -1,0 +1,23 @@
+instructions/summary/ashigaru_summary.md
+  d372b4fb3f410ebd 1-263
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.0.42",
+  "base_commit_sha": "ba2cae21c6ca67cc282f7a6eeb584b89554cc477",
+  "prompts": {
+    "d372b4fb3f410ebd": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "9cf2e986-a36c-48f9-ac0a-0ce35c2df65c",
+        "model": "glm-4.7"
+      },
+      "human_author": "yuremono <5alviaofficinali50@gmail.com>",
+      "messages": [],
+      "total_additions": 728,
+      "total_deletions": 465,
+      "accepted_lines": 263,
+      "overriden_lines": 0
+    }
+  }
+}
