@@ -1,0 +1,87 @@
+#!/bin/bash
+# ==============================================================================
+# notify-team - Agent Teamsからの通知スクリプト
+# ==============================================================================
+# 機能: tmux send-keysの複雑さを隠蔽し、簡素なインターフェースを提供
+# 使用例: notify-team "タスク完了"
+#          notify-team -t multiagent:0.0 "報告"
+# ==============================================================================
+
+set -euo pipefail
+
+# デフォルト設定
+SESSION="multiagent"  # デフォルトセッション
+PANE="0.0"            # デフォルトペイン
+SCRIPT_NAME=$(basename "$0")
+
+# ヘルプ表示関数
+show_help() {
+  cat << EOF
+使用方法: $SCRIPT_NAME [-t session:pane] <message>
+
+Agent Teams内のエージェントからtmuxセッションの他ペインに通知を送信します。
+
+引数:
+  message        送信するメッセージ（必須）
+
+オプション:
+  -t, --target   送信先ペイン（形式: session:pane）
+                 デフォルト: multiagent:0.0
+  -h, --help     このヘルプを表示
+
+例:
+  $SCRIPT_NAME "タスク完了"
+  $SCRIPT_NAME -t mysession:1.2 "報告があります"
+
+EOF
+}
+
+# 引数チェック
+if [[ $# -eq 0 ]]; then
+  echo "エラー: メッセージが指定されていません。" >&2
+  echo "" >&2
+  echo "使用方法: $SCRIPT_NAME [-t session:pane] <message>" >&2
+  echo "ヘルプを見るには: $SCRIPT_NAME -h" >&2
+  exit 1
+fi
+
+# 引数パース
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -t|--target)
+      TARGET="$2"
+      SESSION="${TARGET%:*}"
+      PANE="${TARGET#*:}"
+      shift 2
+      ;;
+    -h|--help)
+      show_help
+      exit 0
+      ;;
+    *)
+      MESSAGE="$*"
+      break
+      ;;
+  esac
+done
+
+# メッセージが空の場合
+if [[ -z "${MESSAGE:-}" ]]; then
+  echo "エラー: メッセージが指定されていません。" >&2
+  exit 1
+fi
+
+# tmuxセッションの存在確認
+if ! tmux has-session -t "$SESSION" 2>/dev/null; then
+  echo "エラー: tmuxセッション '$SESSION' が見つかりません。" >&2
+  exit 1
+fi
+
+# ターゲットペインの構築
+TARGET_PANE="${SESSION}:${PANE}"
+
+# 送信（2回に分けて実行）
+tmux send-keys -t "$TARGET_PANE" "$MESSAGE"
+tmux send-keys -t "$TARGET_PANE" Enter
+
+echo "✓ メッセージを送信しました [$TARGET_PANE]: $MESSAGE"

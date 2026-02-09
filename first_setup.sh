@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================
-# first_setup.sh - multi-agent-shogun 初回セットアップスクリプト
+# first_setup.sh - Agent Teams インフラ初回セットアップスクリプト
 # Ubuntu / WSL / Mac 用環境構築ツール
 # ============================================================
 # 実行方法:
@@ -50,7 +50,7 @@ HAS_ERROR=false
 
 echo ""
 echo "  ╔══════════════════════════════════════════════════════════════╗"
-echo "  ║  🏯 multi-agent-shogun インストーラー                         ║"
+echo "  ║  Agent Teams + tmux インフラ インストーラー                  ║"
 echo "  ║     Initial Setup Script for Ubuntu / WSL                    ║"
 echo "  ╚══════════════════════════════════════════════════════════════╝"
 echo ""
@@ -332,15 +332,13 @@ log_step "STEP 6: ディレクトリ構造作成"
 
 # 必要なディレクトリ一覧
 DIRECTORIES=(
-    "queue/tasks"
-    "queue/reports"
     "config"
-    "status"
-    "instructions"
+    "context"
+    "bin"
     "logs"
-    "demo_output"
-    "skills"
-    "memory"
+    "docs"
+    "templates"
+    "WORKS"
 )
 
 CREATED_COUNT=0
@@ -374,13 +372,13 @@ log_step "STEP 7: 設定ファイル確認"
 if [ ! -f "$SCRIPT_DIR/config/settings.yaml" ]; then
     log_info "config/settings.yaml を作成中..."
     cat > "$SCRIPT_DIR/config/settings.yaml" << EOF
-# multi-agent-shogun 設定ファイル
+# Agent Teams + tmux インフラ 設定ファイル
 
 # 言語設定
-# ja: 日本語（戦国風日本語のみ、併記なし）
-# en: 英語（戦国風日本語 + 英訳併記）
-# その他の言語コード（es, zh, ko, fr, de 等）も対応
-language: ja
+# standard: 標準モード（戦国風表現なし）
+# ja: 日本語（戦国風表現）
+# en: 英語
+language: standard
 
 # シェル設定
 # bash: bash用プロンプト（デフォルト）
@@ -389,7 +387,7 @@ shell: bash
 
 # スキル設定
 skill:
-  # スキル保存先（スキル名に shogun- プレフィックスを付けて保存）
+  # スキル保存先
   save_path: "~/.claude/skills/"
 
   # ローカルスキル保存先（このプロジェクト専用）
@@ -423,78 +421,17 @@ else
     log_info "config/projects.yaml は既に存在します"
 fi
 
-# memory/global_context.md（システム全体のコンテキスト）
-if [ ! -f "$SCRIPT_DIR/memory/global_context.md" ]; then
-    log_info "memory/global_context.md を作成中..."
-    cat > "$SCRIPT_DIR/memory/global_context.md" << 'EOF'
-# グローバルコンテキスト
-最終更新: (未設定)
-
-## システム方針
-- (殿の好み・方針をここに記載)
-
-## プロジェクト横断の決定事項
-- (複数プロジェクトに影響する決定をここに記載)
-
-## 注意事項
-- (全エージェントが知るべき注意点をここに記載)
-EOF
-    log_success "global_context.md を作成しました"
-else
-    log_info "memory/global_context.md は既に存在します"
-fi
-
 RESULTS+=("設定ファイル: OK")
 
 # ============================================================
-# STEP 8: 足軽用タスク・レポートファイル初期化
+# STEP 8: スクリプト実行権限付与
 # ============================================================
-log_step "STEP 8: キューファイル初期化"
-
-# 足軽用タスクファイル作成
-for i in {1..8}; do
-    TASK_FILE="$SCRIPT_DIR/queue/tasks/ashigaru${i}.yaml"
-    if [ ! -f "$TASK_FILE" ]; then
-        cat > "$TASK_FILE" << EOF
-# 足軽${i}専用タスクファイル
-task:
-  task_id: null
-  parent_cmd: null
-  description: null
-  target_path: null
-  status: idle
-  timestamp: ""
-EOF
-    fi
-done
-log_info "足軽タスクファイル (1-8) を確認/作成しました"
-
-# 足軽用レポートファイル作成
-for i in {1..8}; do
-    REPORT_FILE="$SCRIPT_DIR/queue/reports/ashigaru${i}_report.yaml"
-    if [ ! -f "$REPORT_FILE" ]; then
-        cat > "$REPORT_FILE" << EOF
-worker_id: ashigaru${i}
-task_id: null
-timestamp: ""
-status: idle
-result: null
-EOF
-    fi
-done
-log_info "足軽レポートファイル (1-8) を確認/作成しました"
-
-RESULTS+=("キューファイル: OK")
-
-# ============================================================
-# STEP 9: スクリプト実行権限付与
-# ============================================================
-log_step "STEP 9: 実行権限設定"
+log_step "STEP 8: 実行権限設定"
 
 SCRIPTS=(
     "setup.sh"
-    "shutsujin_departure.sh"
     "first_setup.sh"
+    "bin/notify-team"
 )
 
 for script in "${SCRIPTS[@]}"; do
@@ -507,131 +444,9 @@ done
 RESULTS+=("実行権限: OK")
 
 # ============================================================
-# STEP 10: bashrc alias設定
+# STEP 9: Memory MCP セットアップ
 # ============================================================
-log_step "STEP 10: alias設定"
-
-# alias追加対象ファイル
-BASHRC_FILE="$HOME/.bashrc"
-
-# aliasが既に存在するかチェックし、なければ追加
-ALIAS_ADDED=false
-
-# css alias (将軍ウィンドウの起動)
-if [ -f "$BASHRC_FILE" ]; then
-    EXPECTED_CSS="alias css='tmux attach-session -t shogun'"
-    if ! grep -q "alias css=" "$BASHRC_FILE" 2>/dev/null; then
-        # alias が存在しない → 新規追加
-        echo "" >> "$BASHRC_FILE"
-        echo "# multi-agent-shogun aliases (added by first_setup.sh)" >> "$BASHRC_FILE"
-        echo "$EXPECTED_CSS" >> "$BASHRC_FILE"
-        log_info "alias css を追加しました（将軍ウィンドウの起動）"
-        ALIAS_ADDED=true
-    elif ! grep -qF "$EXPECTED_CSS" "$BASHRC_FILE" 2>/dev/null; then
-        # alias は存在するがパスが異なる → 更新
-        if sed -i "s|alias css=.*|$EXPECTED_CSS|" "$BASHRC_FILE" 2>/dev/null; then
-            log_info "alias css を更新しました（パス変更検出）"
-        else
-            log_warn "alias css の更新に失敗しました"
-        fi
-        ALIAS_ADDED=true
-    else
-        log_info "alias css は既に正しく設定されています"
-    fi
-
-    # csm alias (家老・足軽ウィンドウの起動)
-    EXPECTED_CSM="alias csm='tmux attach-session -t multiagent'"
-    if ! grep -q "alias csm=" "$BASHRC_FILE" 2>/dev/null; then
-        if [ "$ALIAS_ADDED" = false ]; then
-            echo "" >> "$BASHRC_FILE"
-            echo "# multi-agent-shogun aliases (added by first_setup.sh)" >> "$BASHRC_FILE"
-        fi
-        echo "$EXPECTED_CSM" >> "$BASHRC_FILE"
-        log_info "alias csm を追加しました（家老・足軽ウィンドウの起動）"
-        ALIAS_ADDED=true
-    elif ! grep -qF "$EXPECTED_CSM" "$BASHRC_FILE" 2>/dev/null; then
-        if sed -i "s|alias csm=.*|$EXPECTED_CSM|" "$BASHRC_FILE" 2>/dev/null; then
-            log_info "alias csm を更新しました（パス変更検出）"
-        else
-            log_warn "alias csm の更新に失敗しました"
-        fi
-        ALIAS_ADDED=true
-    else
-        log_info "alias csm は既に正しく設定されています"
-    fi
-else
-    log_warn "$BASHRC_FILE が見つかりません"
-fi
-
-if [ "$ALIAS_ADDED" = true ]; then
-    log_success "alias設定を追加しました"
-    log_warn "alias を反映するには、以下のいずれかを実行してください："
-    log_info "  1. source ~/.bashrc"
-    log_info "  2. PowerShell で 'wsl --shutdown' してからターミナルを開き直す"
-    log_info "  ※ ウィンドウを閉じるだけでは WSL が終了しないため反映されません"
-fi
-
-RESULTS+=("alias設定: OK")
-
-# ============================================================
-# STEP 10.5: WSL メモリ最適化設定
-# ============================================================
-if [ "$IS_WSL" = true ]; then
-    log_step "STEP 10.5: WSL メモリ最適化設定"
-
-    # .wslconfig の確認・設定（Windows側のユーザーディレクトリに配置）
-    WIN_USER_DIR=$(cmd.exe /C "echo %USERPROFILE%" 2>/dev/null | tr -d '\r')
-    if [ -n "$WIN_USER_DIR" ]; then
-        # Windows パスを WSL パスに変換
-        WSLCONFIG_PATH=$(wslpath "$WIN_USER_DIR")/.wslconfig
-
-        if [ -f "$WSLCONFIG_PATH" ]; then
-            if grep -q "autoMemoryReclaim" "$WSLCONFIG_PATH" 2>/dev/null; then
-                log_info ".wslconfig に autoMemoryReclaim は既に設定済みです"
-            else
-                log_info ".wslconfig に autoMemoryReclaim=gradual を追加中..."
-                # [experimental] セクションがあるか確認
-                if grep -q "\[experimental\]" "$WSLCONFIG_PATH" 2>/dev/null; then
-                    # [experimental] セクションの直後に追加
-                    sed -i '/\[experimental\]/a autoMemoryReclaim=gradual' "$WSLCONFIG_PATH"
-                else
-                    echo "" >> "$WSLCONFIG_PATH"
-                    echo "[experimental]" >> "$WSLCONFIG_PATH"
-                    echo "autoMemoryReclaim=gradual" >> "$WSLCONFIG_PATH"
-                fi
-                log_success ".wslconfig に autoMemoryReclaim=gradual を追加しました"
-                log_warn "反映には 'wsl --shutdown' 後の再起動が必要です"
-            fi
-        else
-            log_info ".wslconfig を新規作成中..."
-            cat > "$WSLCONFIG_PATH" << 'EOF'
-[experimental]
-autoMemoryReclaim=gradual
-EOF
-            log_success ".wslconfig を作成しました (autoMemoryReclaim=gradual)"
-            log_warn "反映には 'wsl --shutdown' 後の再起動が必要です"
-        fi
-
-        RESULTS+=("WSL メモリ最適化: OK (.wslconfig設定済み)")
-    else
-        log_warn "Windowsユーザーディレクトリの取得に失敗しました"
-        log_info "手動で %USERPROFILE%\\.wslconfig に以下を追加してください:"
-        echo "  [experimental]"
-        echo "  autoMemoryReclaim=gradual"
-        RESULTS+=("WSL メモリ最適化: 手動設定必要")
-    fi
-
-    # 即時キャッシュクリアの案内
-    log_info "メモリキャッシュを即時クリアするには以下を実行:"
-    echo "  sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches'"
-else
-    log_info "WSL環境ではないため、メモリ最適化設定をスキップ"
-fi
-
-# ============================================================
-# STEP 11: Memory MCP セットアップ
-# ============================================================
-log_step "STEP 11: Memory MCP セットアップ"
+log_step "STEP 9: Memory MCP セットアップ"
 
 if command -v claude &> /dev/null; then
     # Memory MCP が既に設定済みか確認
@@ -641,7 +456,7 @@ if command -v claude &> /dev/null; then
     else
         log_info "Memory MCP を設定中..."
         if claude mcp add memory \
-            -e MEMORY_FILE_PATH="$SCRIPT_DIR/memory/shogun_memory.jsonl" \
+            -e MEMORY_FILE_PATH="$SCRIPT_DIR/memory/memory.jsonl" \
             -- npx -y @modelcontextprotocol/server-memory 2>/dev/null; then
             log_success "Memory MCP 設定完了"
             RESULTS+=("Memory MCP: 設定完了")
@@ -656,6 +471,29 @@ else
 fi
 
 # ============================================================
+# STEP 10: カスタムエージェント確認
+# ============================================================
+log_step "STEP 10: カスタムエージェント確認"
+
+if [ -d "$HOME/.claude/agents" ]; then
+    AGENT_COUNT=$(ls -1 "$HOME/.claude/agents"/*.md 2>/dev/null | wc -l)
+    if [ "$AGENT_COUNT" -gt 0 ]; then
+        log_success "カスタムエージェントが $AGENT_COUNT 個見つかりました"
+        log_info "エージェント一覧:"
+        ls -1 "$HOME/.claude/agents"/*.md 2>/dev/null | xargs -n1 basename | sed 's/^/  - /'
+        RESULTS+=("カスタムエージェント: OK ($AGENT_COUNT個)")
+    else
+        log_warn "カスタムエージェントが見つかりませんでした"
+        log_info "~/.claude/agents/ にエージェント定義を配置してください"
+        RESULTS+=("カスタムエージェント: 未定義")
+    fi
+else
+    log_warn "~/.claude/agents/ ディレクトリが見つかりません"
+    log_info "mkdir -p ~/.claude/agents  を実行してエージェント定義を配置してください"
+    RESULTS+=("カスタムエージェント: ディレクトリ未作成")
+fi
+
+# ============================================================
 # 結果サマリー
 # ============================================================
 echo ""
@@ -665,7 +503,7 @@ echo "  ╚═══════════════════════
 echo ""
 
 for result in "${RESULTS[@]}"; do
-    if [[ $result == *"未インストール"* ]] || [[ $result == *"失敗"* ]]; then
+    if [[ $result == *"未インストール"* ]] || [[ $result == *"失敗"* ]] || [[ $result == *"未定義"* ]]; then
         echo -e "  ${RED}✗${NC} $result"
     elif [[ $result == *"アップグレード"* ]] || [[ $result == *"スキップ"* ]]; then
         echo -e "  ${YELLOW}!${NC} $result"
@@ -685,7 +523,7 @@ if [ "$HAS_ERROR" = true ]; then
     echo "  すべての依存関係が揃ったら、再度このスクリプトを実行して確認できます。"
 else
     echo "  ╔══════════════════════════════════════════════════════════════╗"
-    echo "  ║  ✅ セットアップ完了！準備万端でござる！                      ║"
+    echo "  ║  ✅ セットアップ完了！準備万端です！                          ║"
     echo "  ╚══════════════════════════════════════════════════════════════╝"
 fi
 
@@ -694,25 +532,22 @@ echo "  ┌───────────────────────
 echo "  │  📜 次のステップ                                             │"
 echo "  └──────────────────────────────────────────────────────────────┘"
 echo ""
-echo "  出陣（全エージェント起動）:"
-echo "     ./shutsujin_departure.sh"
+echo "  Claude Code を起動して Agent Teams を作成:"
+echo "     cd $SCRIPT_DIR"
+echo "     claude"
 echo ""
-echo "  オプション:"
-echo "     ./shutsujin_departure.sh -s            # セットアップのみ（Claude手動起動）"
-echo "     ./shutsujin_departure.sh -t            # Windows Terminalタブ展開"
-echo "     ./shutsujin_departure.sh -shell bash   # bash用プロンプトで起動"
-echo "     ./shutsujin_departure.sh -shell zsh    # zsh用プロンプトで起動"
-echo ""
-echo "  ※ シェル設定は config/settings.yaml の shell: でも変更可能です"
+echo "  Claude Code内で:"
+echo "     TeamCreate(team_name=\"my-project\", description=\"My project team\")"
+echo "     Task(subagent_type=\"researcher\", team_name=\"my-project\", ...)"
 echo ""
 echo "  詳細は README.md を参照してください。"
 echo ""
 echo "  ════════════════════════════════════════════════════════════════"
-echo "   天下布武！ (Tenka Fubu!)"
+echo "   Let's build with Agent Teams!"
 echo "  ════════════════════════════════════════════════════════════════"
 echo ""
 
-# 依存関係不足の場合は exit 1 を返す（install.bat が検知できるように）
+# 依存関係不足の場合は exit 1 を返す
 if [ "$HAS_ERROR" = true ]; then
     exit 1
 fi
