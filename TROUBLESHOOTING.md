@@ -111,7 +111,7 @@ npm install -g @anthropic-ai/claude-code
 
 **症状:**
 - 普通のClaude Codeとしてしか応答しない
-- 「殿」「でござる」といった言葉が出てこない
+- 「ユーザー」「でござる」といった言葉が出てこない
 
 **原因:**
 指示書（`instructions/shogun.md` など）が読み込まれていません。
